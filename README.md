@@ -118,6 +118,74 @@ WHERE t.home_id = :home AND p.person_id = :person
 
 ## Modelos de Base de Datos
 
+### Diagrama Entidad-Relación General
+
+```mermaid
+---
+config:
+  layout: elk
+  theme: default
+---
+erDiagram
+    %% --- RELACIONES DOCUMENTALES (Integridad Lógica / Cross-Service) ---
+    USER ||--o{ TASK : "responsable (ref externa)"
+    HOME ||--o{ TASK : "aloja (ref externa)"
+    
+    %% --- RELACIONES FÍSICAS (Integridad Referencial de BD local) ---
+    PRIORITY ||--|{ TASK : "prioriza"
+    STATUS ||--|{ TASK : "clasifica"
+
+    %% --- RELACIONES FÍSICAS (Dominio Auth/Home) ---
+    USER ||--o{ HOME_USER : "pertenece"
+    HOME ||--o{ HOME_USER : "miembros"
+    ROLE ||--|{ HOME_USER : "define"
+
+    USER {
+        uuid user_id PK
+        string email UK
+        string name
+    }
+
+    HOME {
+        uuid home_id PK
+        string name
+    }
+
+    HOME_USER {
+        uuid home_user_id PK
+        uuid home_id FK
+        uuid user_id FK
+        uuid role_id FK
+        string constraint "UNIQUE(home_id, user_id)"
+    }
+
+    TASK {
+        uuid task_id PK
+        uuid home_id "external ref (NOT NULL)"
+        uuid assignee_user_id "external ref (NOT NULL)"
+        string title
+        string description
+        uuid priority_id FK
+        uuid status_id FK
+    }
+
+    PRIORITY {
+        uuid priority_id PK
+        string name
+        int level
+    }
+
+    STATUS {
+        uuid status_id PK
+        string name
+    }
+
+    ROLE {
+        uuid role_id PK
+        string name
+    }
+```
+
 ### Microservicio de Usuarios y Autenticación
 
 **Modelo Lógico:**
