@@ -1,6 +1,6 @@
 ﻿# Entregables Fabrica escuela primer sprint 
 
-Nosotros debecrear una herramienta de gestion de tareas para grupos familiares
+Nosotros debemos crear una herramienta de gestión de tareas para grupos familiares
 
 ## Definición de las entidades 
 
