@@ -124,7 +124,7 @@ WHERE t.home_id = :home AND p.person_id = :person
 ---
 config:
   layout: elk
-  theme: default
+  theme: neutral
 ---
 erDiagram
     %% --- RELACIONES DOCUMENTALES (Integridad Lógica / Cross-Service) ---
