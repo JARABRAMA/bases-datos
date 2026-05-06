@@ -204,6 +204,41 @@ WHERE guest_id = :id;
 
 **`L = (4 × 4) + (25 + 20 + 10 + 80) + (16 + 1 + 8) + 1 = 177 bytes`**
 
+Ahora se calculará el numero de regsitros por pagina, asumiendo que el tamaño de la pagina es de $4 KB$ es decir 4096 bytes, y utilizando la siguente formula
+
+$$
+P = 1 + 1 + 4F_r + F_r L
+$$
+$$
+4096 = 1 + 1 + 4F_r + 177 F_r
+$$
+$$
+4094 = 181F_r
+$$
+$$
+F_r = \frac{4094}{181} = 22.6 \approx 22\ \text{registros por paginas}
+$$
+
+Ahora calcularemos el numero de paginas que ocupa la relacion en el disco $B_r$, usando una estimacion de cuantas tuplas tendra la tabla en un año $T_r$. Usando la siguiente relacion:
+
+$$
+B_r = \frac{T_r}{F_r} 
+$$
+
+estimando que en un año habrán 1 millon de usuarios registrados en un año. 
+
+$$
+B_r = \frac{1 000 000}{22} = 45454.545 \approx 45455 \text{ paginas}
+$$
+
+Finalmente para saber cuanto espacio ocupa la relacion dentro del disco.
+
+$$
+size(Relacion) = B_r \times P = 45455 \times 4KB = 181820KB
+$$
+
+Asi que la relacion estara ocupando aproximadamente $0.18182GB$ dentro del disco
+
 ---
 
 #### `tasks`
@@ -223,6 +258,44 @@ WHERE guest_id = :id;
 
 **`L = (4 × 2) + (100 + 15) + (16×5 + 8×2) + 2 = 221 bytes`**
 
+Ahora se calculará el numero de regsitros por pagina, para la tabla tareas de la misma manera que se realizo anteriormente
+
+$$
+P = 1 + 1 + 4F_r + F_r L
+$$
+$$
+4096 = 1 + 1 + 4F_r + 221 F_r
+$$
+$$
+4094 = 225F_r
+$$
+$$
+F_r = \frac{4094}{225} = 18.19 \approx 18\ \text{registros por paginas}
+$$
+
+Ahora calcularemos el numero de paginas que ocupa la relacion en el disco $B_r$, usando una estimacion de cuantas tuplas tendra la tabla en un año $T_r$. Usando la siguiente relacion:
+
+$$
+B_r = \frac{T_r}{F_r} 
+$$
+
+Como se estimo un millon de usuariuos en un año, aproximadamente cada usuario tendra una tareas diaria, por lo cual en un mes cada usuario tendra 30 tareas. Por lo tanto en un mes tendremos aproximadamente 30 millones de tareas
+
+$$
+B_r = \frac{30000000}{18} = 1666666.66 \approx 1666667 \text{ paginas}
+$$
+
+Finalmente para saber cuanto espacio ocupa la relacion dentro del disco.
+
+$$
+size(Relacion) = B_r \times P = 1666667 \times 4KB = 6666668KB
+$$
+
+
+Asi que la relacion estara ocupando aproximadamente $6.666668GB$ dentro del disco cada mes
+
+En un año tendriamos $6.666668GB \times 12 = 80.000016GB$
+
 ---
 
 #### `status` y `priority`
@@ -235,14 +308,16 @@ WHERE guest_id = :id;
 
 **`L = (4 × 1) + 8 + 16 + 1 = 29 bytes`**
 
+Debido al valor tan pequeño que ocuparan ambas tablas no se realizará la estimación en disco ya que es insignificante
+
 ---
 
-### Proyección total (1.000.000 usuarios)
+### Proyección total anual (1.000.000 usuarios)
 
 | Tabla | Registros | Tamaño por registro | **Total** |
 |---|---:|:---:|---:|
-| `guests` | 1.000.000 | 177 bytes | **~0.177 GB** |
-| `tasks` | 30.000.000 | 221 bytes | **~6.63 GB** |
+| `guests` | 1.000.000 | 177 bytes | **~0.18 GB** |
+| `tasks` | 360.000.000 | 221 bytes | **~80.000016 GB** |
 | `status` | 10 | 29 bytes | ~290 bytes |
 | `priority` | 10 | 29 bytes | ~290 bytes |
 
