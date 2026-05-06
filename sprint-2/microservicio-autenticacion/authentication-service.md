@@ -84,11 +84,7 @@ En este caso ninguno de los datos puede ser nullos asi que no tenemos mapa de bi
 Campos de longitud variable: name, lastname, password_hash, email
 
 $$
-L = 4 \times \text{\# campos de longitud variable}
-+ \sum \text{size(campos de longitud fija)}
-+ \text{size(mapa de bits)}
-+ \sum \text{tamaño estimado de cada campo de longitud variable}
-\tag{1}
+L = 4 \times \text{\# campos de longitud variable} + \sum \text{size(campos de longitud fija)} + \text{size(mapa de bits)} + \sum \text{tamaño estimado de cada campo de longitud variable} \tag{1}
 $$
 
 $$
