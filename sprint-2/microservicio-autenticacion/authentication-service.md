@@ -66,7 +66,7 @@ INSERT INTO auth.tokens
 (:tokenHash, :expriationDate, :userId, :tokenType)
 ```
 
-## Volumen de datos aproximado por tablas 
+## Volumen de datos aproximado por tablas
 
 ### Tabla de usuarios 
 
