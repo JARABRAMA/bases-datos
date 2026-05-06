@@ -48,19 +48,40 @@ CREATE TABLE IF NOT EXISTS auth.tokens (
 
 1. Consultar un token por su hash (verificar autenticacion)
 
-`SELECT * FROM auth.tokens WHERE token_hash = :hash`
+```{sql }
+SELECT * FROM auth.tokens WHERE token_hash = :hash
+```
 
 2. Revocar todos los tokens de un usuario (logout)
 
-`UPDATE auth.tokens SET expirated_at = NOW() WHERE user_id = :userId`
+```{sql}
+UPDATE auth.tokens SET expirated_at = NOW() WHERE user_id = :userId
+```
 
+3. Crear un nuevo token login o register
+
+```{sql}
+INSERT INTO auth.tokens 
+(token_hash, expiration_date, user_id, token_type) VALUES
+(:tokenHash, :expriationDate, :userId, :tokenType)
+```
 
 ## Volumen de datos aproximado por tablas 
 
 ### Tabla de usuarios 
+
+| Campo             | Tamaño aprox |
+| ----------------- | ------------ |
+| user_id           | 16 B         |
+| name              | 30 B         |
+| lastname          | 30 B         |
+| password_hash     | 60 B         |
+| created_at        | 8 B          |
+| is_active         | 1 B          |
+| email             | 50 B         |
+
 En este caso ninguno de los datos puede ser nullos asi que no tenemos mapa de bits. En la tabla definimos aproximadamente el tamaño de cada uno de los tipos de datos
 Campos de longitud variable: name, lastname, password_hash, email
-
 
 $$
 L = 4 \times \text{\# campos de longitud variable}
@@ -75,26 +96,55 @@ L=4 \times 4 +(16+8+1)+ (30+30+60+50)
 $$
 
 $$
-L = 211 B
+L = 211\  \text{bytes}
 $$
 
+Ahora calcula re el numero de regsitros por pagina, asumiendo que el tamaño de la pagina es de $4 KB$ es decir $4096\ \text{bytes}$1, y utilizando la siguente formula
 
-| Campo             | Tamaño aprox |
-| ----------------- | ------------ |
-| user_id           | 16 B         |
-| name              | 30 B         |
-| lastname          | 30 B         |
-| password_hash     | 60 B         |
-| created_at        | 8 B          |
-| is_active         | 1 B          |
-| email             | 50 B         |
+$$
+P = 1 + 1 + 4F_r + F_r L
+$$
+$$
+4096 = 1 + 1 + 4F_r + 211 F_r
+$$
+$$
+4094 = 215F_r
+$$
+$$
+F_r = \frac{24094}{215} = 19.04 \approx 19\ \text{registros por paginas}
+$$
 
+Ahora calcularemos el numero de paginas que ocupa la relacion en el disco $B_r$, usando una estimacion de cuantas tuplas tendra la tabla en un año $T_r$. Usando la siguiente relacion:
 
-tamaño de tabla por tupla = `211 Bytes`
+$$
+B_r = \frac{T_r}{F_r} 
+$$
 
-En caso de que nuestro programa llege a tener 1 millon de usuarios el tamaño de la base de la tabla seria de `211.000.000 Bytes` que serian `211 MB`
+estimando que en un año habrán 1 millon de usuarios registrados en un año. 
+
+$$
+B_r = \frac{1 000 000}{19} = 52 631.578 \approx 52 632 \text{ paginas}
+$$
+
+Finalmente para saber cuanto espacio ocupa la relacion dentro del disco.
+
+$$
+size(Relacion) = B_r \times P = 52 632 \times 4KB = 2105360KB
+$$
+
+Asi que la relacion estara ocupando aproximadamente $2.10536GB$ dentro del disco
 
 ### Tabla de tokens
+
+| Campo           | Tamaño |
+| --------------- | ------ |
+| token_id        | 16 B   |
+| token_hash      | 60 B   |
+| expiration_date | 8 B    |
+| expired_at      | 8 B    |
+| user_id         | 16 B   |
+| token_type      | 20 B   |
+
 Esta tabla tampoco adimitira solo admitira `expirated_at` como nulo. 
 campos de longitud variable: token_hash, token_type
 
@@ -143,15 +193,3 @@ size(Relacion) = 4KB \times 344 828 = 1379312KB \approx 1.315 GB
 $$
 
 
-| Campo           | Tamaño |
-| --------------- | ------ |
-| token_id        | 16 B   |
-| token_hash      | 60 B   |
-| expiration_date | 8 B    |
-| expired_at      | 8 B    |
-| user_id         | 16 B   |
-| token_type      | 20 B   |
-
-tamaño de cada tupla `137 Bytes`
-
-en el caso de que hayan unos 10 millones de registros con tokens (se experan que haya hasta 10 veces mas tokens que usaurios) el tamño de la tabla sera `1370MB`
