@@ -106,6 +106,43 @@ $$
 L = 137B
 $$
 
+Calculare el $F_r$ usando la siguiente formula y asumiendo que $P=4096\ bytes$
+
+$$
+P = 1+1+4F_r +F_r L
+$$
+
+$$
+4096 = 1+1+4F_r +137F_r
+$$
+
+$$
+4094 = 141F_r
+$$
+
+$$
+F_r = \frac{4094}{141} =29.03 \approx 29\ \text{registros por pagina}
+$$
+
+Ahora calculare el $B_r$  que es el numero de paginas que ocupa la relacion en disco, teniendo en cuenta que $T_r$ es el numero de tuplas que contiene la relacion. Estimando que dentro de un año se tendrán un 10 millones de tokens.
+
+$$
+B_r = \frac{T_r}{F_r} = \frac{10 000 000}{29} = 344 827.58 \approx 344 828\ \text{paginas}
+$$
+
+ahora para encontrar el tamaño total de la relacion en un año multiplico el peso de cada registro por el numero de registros por pagina y el numero total de paginas
+
+$$
+size(Relacion) = P  \times B_r
+$$
+p
+teniendo en cuenta que $4096 = 4\times2^{10} = 4KB$
+
+$$
+size(Relacion) = 4KB \times 344 828 = 1379312KB \approx 1.315 GB
+$$
+
+
 | Campo           | Tamaño |
 | --------------- | ------ |
 | token_id        | 16 B   |
