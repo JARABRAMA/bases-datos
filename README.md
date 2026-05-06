@@ -16,6 +16,20 @@ La aplicación usa una **base de datos relacional compartida**, separada por sch
 
 ---
 
+##  Flujo entre las Entidades de los Microservicios
+
+Diagrama general que muestra las entidades de cada microservicio y cómo fluyen los datos entre ellos:
+
+- **Líneas continuas**: relaciones internas dentro de un mismo servicio.
+- **Líneas punteadas**: comunicación entre microservicios.
+  - `AUTH_User → MH_Person` y `AUTH_User → TASKS_User`: sincronización vía Azure Storage Queue.
+  - `MH_Home → TASKS_Task`: referencia lógica por `home_id` (sin FK física, BDs separadas por schema).
+- **Nodos en naranja** (`MH_Person`, `TASKS_User`): copias replicadas del `User` de Authentication.
+
+![Flujo entre las entidades de los microservicios](./sprint-2/flujo-entidades-microservicios.png)
+
+---
+
 ##  Roles Técnicos de Base de Datos
 
 > Los roles definidos no son roles funcionales de usuario como `ADMIN`, `MEMBER` o `GUEST`.  
