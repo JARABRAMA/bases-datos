@@ -118,7 +118,7 @@ $$
 L = 211\  \text{bytes}
 $$
 
-Ahora calcula re el numero de regsitros por pagina, asumiendo que el tamaño de la pagina es de $4 KB$ es decir $4096\ \text{bytes}$1, y utilizando la siguente formula
+Ahora calcula re el numero de regsitros por pagina, asumiendo que el tamaño de la pagina es de $4 KB$ es decir $4096\ \text{bytes}$, y utilizando la siguente formula
 
 $$
 P = 1 + 1 + 4F_r + F_r L
