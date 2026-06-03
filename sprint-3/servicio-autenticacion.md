@@ -88,125 +88,165 @@ add
 
 ```
 
-
 ## Volumen de datos aproximado por tablas
 
-### Tabla de usuarios 
+### Tabla `auth.users`
 
-| Campo             | Tamaño aprox |
-| ----------------- | ------------ |
-| user_id           | 16 B         |
-| name              | 30 B         |
-| lastname          | 30 B         |
-| password_hash     | 60 B         |
-| created_at        | 8 B          |
-| is_active         | 1 B          |
-| email             | 50 B         |
+| Campo | Tamaño aprox |
+|---|---|
+| user_id | 16 B |
+| name | 30 B |
+| lastname | 30 B |
+| password_hash | 60 B |
+| created_at | 8 B |
+| is_active | 1 B |
+| email | 50 B |
 
-En este caso ninguno de los datos puede ser nullos asi que no tenemos mapa de bits. En la tabla definimos aproximadamente el tamaño de cada uno de los tipos de datos
-Campos de longitud variable: name, lastname, password_hash, email
-
-$$
-L = 4 \times \text{\ N campos de longitud variable} + \sum \text{size(campos de longitud fija)} + \text{size(mapa de bits)} + \sum \text{tamaño estimado de cada campo de longitud variable} 
-$$
+Ningún campo admite nulos, por lo que no hay mapa de bits. Los campos de longitud variable son: `name`, `lastname`, `password_hash`, `email`.
 
 $$
-L=4 \times 4 +(16+8+1)+ (30+30+60+50) 
+L = 4 \times \text{N campos de longitud variable} + \sum \text{size(campos de longitud fija)} + \sum \text{tamaño estimado de cada campo de longitud variable}
 $$
 
 $$
-L = 211\  \text{bytes}
-$$
-
-Ahora calcula re el numero de regsitros por pagina, asumiendo que el tamaño de la pagina es de $4 KB$ es decir $4096\ \text{bytes}$, y utilizando la siguente formula
-
-$$
-P = 1 + 1 + 4F_r + F_r L
-$$
-$$
-4096 = 1 + 1 + 4F_r + 211 F_r
-$$
-$$
-4094 = 215F_r
-$$
-$$
-F_r = \frac{24094}{215} = 19.04 \approx 19\ \text{registros por paginas}
-$$
-
-Ahora calcularemos el numero de paginas que ocupa la relacion en el disco $B_r$, usando una estimacion de cuantas tuplas tendra la tabla en un año $T_r$. Usando la siguiente relacion:
-
-$$
-B_r = \frac{T_r}{F_r} 
-$$
-
-estimando que en un año habrán 1 millon de usuarios registrados en un año. 
-
-$$
-B_r = \frac{1 000 000}{19} = 52 631.578 \approx 52 632 \text{ paginas}
-$$
-
-Finalmente para saber cuanto espacio ocupa la relacion dentro del disco.
-
-$$
-size(Relacion) = B_r \times P = 52 632 \times 4KB = 2105360KB
-$$
-
-Asi que la relacion estara ocupando aproximadamente $2.10536GB$ dentro del disco
-
-### Tabla de tokens
-
-| Campo           | Tamaño |
-| --------------- | ------ |
-| token_id        | 16 B   |
-| token_hash      | 60 B   |
-| expiration_date | 8 B    |
-| expired_at      | 8 B    |
-| user_id         | 16 B   |
-| token_type      | 20 B   |
-
-Esta tabla tampoco adimitira solo admitira `expirated_at` como nulo. 
-campos de longitud variable: token_hash, token_type
-
-$$
-L=4 \times 2 +(16+8+8+16)+(60+20)+1
+L = 4 \times 4 + (16 + 8 + 1) + (30 + 30 + 60 + 50)
 $$
 
 $$
-L = 137B
+L = 211\ \text{bytes}
 $$
 
-Calculare el $F_r$ usando la siguiente formula y asumiendo que $P=4096\ bytes$
+Calculando el número de registros por página $F_r$, asumiendo $P = 4096\ \text{bytes}$:
 
 $$
-P = 1+1+4F_r +F_r L
+4096 = 1 + 1 + 4F_r + 211F_r \implies F_r = \frac{4094}{215} \approx 19\ \text{registros/página}
 $$
 
-$$
-4096 = 1+1+4F_r +137F_r
-$$
+Estimando $T_r = 1\,000\,000$ usuarios en un año:
 
 $$
-4094 = 141F_r
+B_r = \frac{1\,000\,000}{19} \approx 52\,632\ \text{páginas}
 $$
 
 $$
-F_r = \frac{4094}{141} =29.03 \approx 29\ \text{registros por pagina}
+\text{size(Relación)} = 52\,632 \times 4\ \text{KB} \approx 2.10\ \text{GB}
 $$
 
-Ahora calculare el $B_r$  que es el numero de paginas que ocupa la relacion en disco, teniendo en cuenta que $T_r$ es el numero de tuplas que contiene la relacion. Estimando que dentro de un año se tendrán un 10 millones de tokens.
+---
+
+### Tabla `auth.tokens`
+
+| Campo | Tamaño |
+|---|---|
+| token_id | 16 B |
+| token_hash | 60 B |
+| expiration_date | 8 B |
+| expirated_at | 8 B |
+| user_id | 16 B |
+| token_type | 20 B |
+
+Solo `expirated_at` admite nulos → mapa de bits de 1 byte. Campos de longitud variable: `token_hash`, `token_type`.
 
 $$
-B_r = \frac{T_r}{F_r} = \frac{10 000 000}{29} = 344 827.58 \approx 344 828\ \text{paginas}
+L = 4 \times 2 + (16 + 8 + 8 + 16) + (60 + 20) + 1 = 137\ \text{bytes}
 $$
 
-ahora para encontrar el tamaño total de la relacion en un año multiplico el peso de cada registro por el numero de registros por pagina y el numero total de paginas
+$$
+4096 = 1 + 1 + 4F_r + 137F_r \implies F_r = \frac{4094}{141} \approx 29\ \text{registros/página}
+$$
+
+Estimando $T_r = 10\,000\,000$ tokens en un año:
 
 $$
-size(Relacion) = P  \times B_r
+B_r = \frac{10\,000\,000}{29} \approx 344\,828\ \text{páginas}
 $$
-p
-teniendo en cuenta que $4096 = 4\times2^{10} = 4KB$
 
 $$
-size(Relacion) = 4KB \times 344 828 = 1379312KB \approx 1.315 GB
+\text{size(Relación)} = 344\,828 \times 4\ \text{KB} \approx 1.315\ \text{GB}
 $$
+
+---
+
+### Tabla `auth.activation_tokens`
+
+| Campo | Tamaño |
+|---|---|
+| id | 16 B |
+| user_id | 16 B |
+| code_hash | 60 B |
+| created_at | 8 B |
+| expires_at | 8 B |
+| attempts | 4 B |
+| invalidated | 1 B |
+
+Ningún campo admite nulos. Campos de longitud variable: `code_hash`.
+
+$$
+L = 4 \times 1 + (16 + 16 + 8 + 8 + 4 + 1) + 60
+$$
+
+$$
+L = 4 + 53 + 60 = 117\ \text{bytes}
+$$
+
+$$
+4096 = 1 + 1 + 4F_r + 117F_r \implies F_r = \frac{4094}{121} \approx 33\ \text{registros/página}
+$$
+
+Los tokens de activación se generan una vez por registro de usuario y se invalidan rápidamente, por lo que se estima un volumen equivalente al de usuarios activos más un margen por reintentos: $T_r = 1\,500\,000$ tokens en un año.
+
+$$
+B_r = \frac{1\,500\,000}{33} \approx 45\,455\ \text{páginas}
+$$
+
+$$
+\text{size(Relación)} = 45\,455 \times 4\ \text{KB} \approx 177.6\ \text{MB}
+$$
+
+---
+
+### Tabla `auth.two_factor_auth_tokens`
+
+| Campo | Tamaño |
+|---|---|
+| id | 16 B |
+| user_id | 16 B |
+| code_hash | 60 B |
+| created_at | 8 B |
+| expires_at | 8 B |
+| attempts | 4 B |
+| invalidated | 1 B |
+
+La estructura es idéntica a `activation_tokens`, por lo que el tamaño de registro es el mismo:
+
+$$
+L = 4 \times 1 + (16 + 16 + 8 + 8 + 4 + 1) + 60 = 117\ \text{bytes}
+$$
+
+$$
+F_r = 33\ \text{registros/página}
+$$
+
+A diferencia de los tokens de activación, los tokens 2FA se generan en cada inicio de sesión de usuarios que tengan habilitada esa funcionalidad. Estimando que el 30% de los usuarios usan 2FA y realizan en promedio 5 inicios de sesión por mes, se obtiene $T_r \approx 1\,800\,000$ tokens en un año.
+
+$$
+B_r = \frac{1\,800\,000}{33} \approx 54\,546\ \text{páginas}
+$$
+
+$$
+\text{size(Relación)} = 54\,546 \times 4\ \text{KB} \approx 213.1\ \text{MB}
+$$
+
+---
+
+### Resumen de volumen estimado
+
+| Tabla | $F_r$ (reg/pág) | $T_r$ estimado | $B_r$ (páginas) | Tamaño aprox |
+|---|---|---|---|---|
+| `users` | 19 | 1,000,000 | 52,632 | 2.10 GB |
+| `tokens` | 29 | 10,000,000 | 344,828 | 1.315 GB |
+| `activation_tokens` | 33 | 1,500,000 | 45,455 | 177.6 MB |
+| `two_factor_auth_tokens` | 33 | 1,800,000 | 54,546 | 213.1 MB |
+| **Total** | — | — | — | **≈ 3.8 GB** |
+
+> Las estimaciones de $T_r$ para `activation_tokens` y `two_factor_auth_tokens` asumen que se aplica una política de limpieza periódica (purga de tokens expirados), ya que de lo contrario el volumen acumulado crecería indefinidamente junto con el de `tokens`.
