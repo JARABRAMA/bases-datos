@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS users.member_home (
 
 
 
-## Analisis de volumen de datso
+## Analisis de volumen de datos
 
 ### Tamaño por registro
 
